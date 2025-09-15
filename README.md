@@ -12,8 +12,9 @@ Generate and play proper Gibberlink/ggwave audio from text. Comes with:
 - UI (recommended):
 
   ```
-  python text-to-gibberlink.py --ui
+  python launcher.py
   ```
+  On Windows, you can also double‑click `launcher.py`.
 
 - CLI:
 
@@ -79,4 +80,3 @@ This repo already includes the `ggwave` source tree under `ggwave/`. The Rust bu
 
 - `ggwave` by Georgi Gerganov (MIT): https://github.com/ggerganov/ggwave
 - Concept inspired by Gibberlink translator repo: https://github.com/yanivlevydfs/gibberlink-translator
-
