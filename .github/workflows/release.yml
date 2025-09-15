@@ -1,0 +1,66 @@
+name: Release (Windows x86/x64)
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build ${{ matrix.target }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [x86_64-pc-windows-msvc, i686-pc-windows-msvc]
+
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cargo build (release)
+        working-directory: gibberlink-tx
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Stage files for packaging
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -Force -ItemType Directory -Path stage\gibberlink-tx\target\release | Out-Null
+          Copy-Item "gibberlink-tx\target\${{ matrix.target }}\release\gibberlink-tx.exe" "stage\gibberlink-tx\target\release\gibberlink-tx.exe"
+          Copy-Item README.md stage\
+          Copy-Item launcher.py stage\
+          Copy-Item text-to-gibberlink.py stage\
+
+      - name: Create zip
+        shell: pwsh
+        run: |
+          $zip = "gibberlink-windows-${{ matrix.target }}.zip"
+          if (Test-Path $zip) { Remove-Item $zip }
+          Compress-Archive -Path "stage/*" -DestinationPath $zip
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gibberlink-${{ matrix.target }}
+          path: gibberlink-windows-${{ matrix.target }}.zip
+
+      - name: Attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: gibberlink-windows-${{ matrix.target }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
