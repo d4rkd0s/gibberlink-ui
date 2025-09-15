@@ -1,6 +1,7 @@
-# Text → Gibberlink (ggwave) Audio
 
-Encode and decode Gibberlink/ggwave audio. Comes with:
+<img width="1200" height="320" alt="gibberlink-logo-dark" src="https://github.com/user-attachments/assets/f80237f9-5786-40c3-bce4-e38b46dbdba9" />
+
+Encode and decode Gibberlink/ggwave audio with ease ✨, comes with:
 
 - A Rust CLI (`gibberlink-tx`) that uses the official `ggwave` C library to encode audio
 - A Python wrapper (`gibberlink-ui.py`) that builds/runs the Rust CLI
