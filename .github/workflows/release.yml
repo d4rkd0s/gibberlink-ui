@@ -41,7 +41,7 @@ jobs:
           Copy-Item "gibberlink-tx\target\${{ matrix.target }}\release\gibberlink-tx.exe" "stage\gibberlink-tx\target\release\gibberlink-tx.exe"
           Copy-Item README.md stage\
           Copy-Item launcher.py stage\
-          Copy-Item text-to-gibberlink.py stage\
+          Copy-Item gibberlink-ui.py stage\
 
       - name: Create zip
         shell: pwsh

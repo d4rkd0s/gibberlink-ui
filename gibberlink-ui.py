@@ -1,14 +1,14 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
-Text â†’ Gibberlink audio (using ggwave) and play it.
+Text → Gibberlink audio (using ggwave) and play it.
 
 This is a thin Python wrapper around the Rust CLI at `gibberlink-tx/target/release/gibberlink-tx`.
 It ensures you can trigger Gibberlink (ggwave) synthesis even if Python cannot
 build the `ggwave` wheel on your system.
 
 Usage examples:
-  python text-to-gibberlink.py --text "hello world"
-  python text-to-gibberlink.py --text "secret" --protocol ultrasound:fast --volume 20
+  python gibberlink-ui.py --text "hello world"
+  python gibberlink-ui.py --text "secret" --protocol ultrasound:fast --volume 20
 
 If the Rust binary is missing, the script will attempt to build it with Cargo.
 """
@@ -54,7 +54,7 @@ def run_ui() -> int:
     exe = ensure_binary()
 
     root = tk.Tk()
-    root.title("Text â†’ Gibberlink (ggwave)")
+    root.title("Text → Gibberlink (ggwave)")
     root.geometry("680x520")
 
     mainframe = ttk.Frame(root, padding=12)
@@ -154,7 +154,7 @@ def run_ui() -> int:
     sep.grid(row=7, column=0, columnspan=4, sticky="ew", pady=(12, 8))
 
     # Decode section: choose WAV and decode to text
-    ttk.Label(mainframe, text="Decode from WAV → text:").grid(row=8, column=0, sticky="w")
+    ttk.Label(mainframe, text="Decode from WAV ? text:").grid(row=8, column=0, sticky="w")
 
     decode_path_var = tk.StringVar(value="")
     decode_entry = ttk.Entry(mainframe, textvariable=decode_path_var)
@@ -197,7 +197,7 @@ def run_ui() -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Text â†’ Gibberlink audio and play it (via ggwave)")
+    parser = argparse.ArgumentParser(description="Text → Gibberlink audio and play it (via ggwave)")
     parser.add_argument("--text", "-t", help="Text to encode (reads stdin if omitted)")
     parser.add_argument("--protocol", default="audible:fast", help="audible|ultrasound|dt|mt optionally with :normal|fast|fastest")
     parser.add_argument("--volume", type=int, default=75, help="Volume 0..100 (default 75)")
