@@ -1,6 +1,6 @@
 # Text → Gibberlink (ggwave) Audio
 
-Generate and play proper Gibberlink/ggwave audio from text. Comes with:
+Encode and decode Gibberlink/ggwave audio. Comes with:
 
 - A Rust CLI (`gibberlink-tx`) that uses the official `ggwave` C library to encode audio
 - A Python wrapper (`gibberlink-ui.py`) that builds/runs the Rust CLI
@@ -8,6 +8,11 @@ Generate and play proper Gibberlink/ggwave audio from text. Comes with:
 - 
 <img width="564" height="371" alt="image" src="https://github.com/user-attachments/assets/0ec35e85-05c6-496e-94b5-3596782c8110" />
 
+
+## Capabilities
+
+- Encode: text -> WAV (via CLI and UI)
+- Decode: WAV -> text (CLI `--decode` and UI "Decode" section)
 
 ## Quick Start
 
@@ -24,7 +29,7 @@ Generate and play proper Gibberlink/ggwave audio from text. Comes with:
   python gibberlink-ui.py --text "hello world" --protocol audible:fast --volume 75 --out gibberlink.wav
   ```
 
-- Decode from WAV → text:
+- Decode from WAV -> text:
 
   ```
   python gibberlink-ui.py --decode gibberlink.wav
