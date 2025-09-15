@@ -22,6 +22,12 @@ Generate and play proper Gibberlink/ggwave audio from text. Comes with:
   python text-to-gibberlink.py --text "hello world" --protocol audible:fast --volume 75 --out gibberlink.wav
   ```
 
+- Decode from WAV → text:
+
+  ```
+  python text-to-gibberlink.py --decode gibberlink.wav
+  ```
+
 - Direct Rust binary (after build):
 
   ```
@@ -48,6 +54,7 @@ This repo already includes the `ggwave` source tree under `ggwave/`. The Rust bu
   - Protocol: `audible|ultrasound|dt|mt` + `:normal|fast|fastest` (e.g., `audible:fast`)
   - Volume: 0–100 (default 75). Very high levels can distort.
   - Output file: path to save the generated WAV. Playback is optional.
+  - Decode section: browse a `.wav` or use last generated file and decode to text.
 
 - CLI flags (wrapper):
   - `--text/-t`: text to encode (reads stdin if omitted)
@@ -56,6 +63,7 @@ This repo already includes the `ggwave` source tree under `ggwave/`. The Rust bu
   - `--out`: output WAV path (default `gibberlink.wav`)
   - `--no-play`: generate but do not play
   - `--ui`: launch the Tkinter UI
+  - `--decode WAV`: decode payload from a WAV file and print
 
 
 ## Project Layout

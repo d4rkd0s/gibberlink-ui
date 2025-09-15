@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-Text → Gibberlink audio (using ggwave) and play it.
+Text â†’ Gibberlink audio (using ggwave) and play it.
 
 This is a thin Python wrapper around the Rust CLI at `gibberlink-tx/target/release/gibberlink-tx`.
 It ensures you can trigger Gibberlink (ggwave) synthesis even if Python cannot
@@ -46,7 +46,7 @@ def ensure_binary() -> str:
 def run_ui() -> int:
     try:
         import tkinter as tk
-        from tkinter import ttk
+        from tkinter import ttk, filedialog
     except Exception as e:
         print(f"Tkinter is not available: {e}", file=sys.stderr)
         return 2
@@ -54,8 +54,8 @@ def run_ui() -> int:
     exe = ensure_binary()
 
     root = tk.Tk()
-    root.title("Text → Gibberlink (ggwave)")
-    root.geometry("560x340")
+    root.title("Text â†’ Gibberlink (ggwave)")
+    root.geometry("680x520")
 
     mainframe = ttk.Frame(root, padding=12)
     mainframe.pack(fill=tk.BOTH, expand=True)
@@ -64,7 +64,7 @@ def run_ui() -> int:
     ttk.Label(mainframe, text="Text to encode:").grid(row=0, column=0, sticky="w")
     text_box = tk.Text(mainframe, height=5, wrap=tk.WORD)
     text_box.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(4, 8))
-    text_box.insert("1.0", "The sum of the parts is greater than the whole.")
+    text_box.insert("1.0", "hello world")
 
     # Protocol dropdown
     ttk.Label(mainframe, text="Protocol:").grid(row=2, column=0, sticky="w")
@@ -79,7 +79,7 @@ def run_ui() -> int:
     protocol_combo.grid(row=2, column=1, sticky="w")
 
     # Volume slider
-    ttk.Label(mainframe, text="Volume (0–100):").grid(row=2, column=2, sticky="e")
+    ttk.Label(mainframe, text="Volume (0â€“100):").grid(row=2, column=2, sticky="e")
     volume_var = tk.IntVar(value=75)
     volume_slider = ttk.Scale(mainframe, from_=0, to=100, orient=tk.HORIZONTAL, variable=volume_var)
     volume_slider.grid(row=2, column=3, sticky="we")
@@ -106,6 +106,7 @@ def run_ui() -> int:
     mainframe.columnconfigure(2, weight=0)
     mainframe.columnconfigure(3, weight=1)
     mainframe.rowconfigure(1, weight=1)
+    mainframe.rowconfigure(12, weight=1)
 
     def run_encode() -> None:
         txt = text_box.get("1.0", tk.END).strip()
@@ -148,24 +149,73 @@ def run_ui() -> int:
     )
     tip.grid(row=6, column=0, columnspan=4, sticky="w", pady=(6, 0))
 
+    # Separator
+    sep = ttk.Separator(mainframe, orient=tk.HORIZONTAL)
+    sep.grid(row=7, column=0, columnspan=4, sticky="ew", pady=(12, 8))
+
+    # Decode section: choose WAV and decode to text
+    ttk.Label(mainframe, text="Decode from WAV → text:").grid(row=8, column=0, sticky="w")
+
+    decode_path_var = tk.StringVar(value="")
+    decode_entry = ttk.Entry(mainframe, textvariable=decode_path_var)
+    decode_entry.grid(row=9, column=0, columnspan=3, sticky="we", pady=(4, 4))
+
+    def browse_wav():
+        path = filedialog.askopenfilename(title="Choose WAV file", filetypes=[("WAV files", "*.wav"), ("All files", "*.*")])
+        if path:
+            decode_path_var.set(path)
+
+    ttk.Button(mainframe, text="Browse...", command=browse_wav).grid(row=9, column=3, sticky="e")
+
+    def use_last_output():
+        decode_path_var.set(out_var.get().strip())
+
+    ttk.Button(mainframe, text="Use Last Output", command=use_last_output).grid(row=10, column=0, sticky="w")
+
+    ttk.Label(mainframe, text="Decoded text:").grid(row=11, column=0, sticky="w", pady=(8, 0))
+    decoded_box = tk.Text(mainframe, height=6, wrap=tk.WORD)
+    decoded_box.grid(row=12, column=0, columnspan=4, sticky="nsew", pady=(4, 8))
+
+    def run_decode():
+        path = decode_path_var.get().strip()
+        decoded_box.delete("1.0", tk.END)
+        if not path:
+            decoded_box.insert(tk.END, "Please choose or provide a WAV path.")
+            return
+        cmd = [exe, "--decode-wav", path]
+        completed = subprocess.run(cmd, capture_output=True, text=True)
+        if completed.returncode == 0:
+            decoded_box.insert(tk.END, completed.stdout.strip())
+        else:
+            msg = completed.stderr.strip() or completed.stdout.strip() or f"Error code {completed.returncode}"
+            decoded_box.insert(tk.END, msg)
+
+    ttk.Button(mainframe, text="Decode", command=run_decode).grid(row=10, column=3, sticky="e")
+
     root.mainloop()
     return 0
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Text → Gibberlink audio and play it (via ggwave)")
+    parser = argparse.ArgumentParser(description="Text â†’ Gibberlink audio and play it (via ggwave)")
     parser.add_argument("--text", "-t", help="Text to encode (reads stdin if omitted)")
     parser.add_argument("--protocol", default="audible:fast", help="audible|ultrasound|dt|mt optionally with :normal|fast|fastest")
     parser.add_argument("--volume", type=int, default=75, help="Volume 0..100 (default 75)")
     parser.add_argument("--out", default="gibberlink.wav", help="Output WAV path (default gibberlink.wav)")
     parser.add_argument("--no-play", dest="play", action="store_false", help="Do not play after generating")
     parser.add_argument("--ui", action="store_true", help="Open a small UI for text + volume")
+    parser.add_argument("--decode", dest="decode_wav", help="Decode payload from WAV -> text and print")
     args = parser.parse_args()
 
     if args.ui:
         return run_ui()
 
     exe = ensure_binary()
+
+    # Decode CLI mode
+    if args.decode_wav:
+        res = subprocess.run([exe, "--decode-wav", args.decode_wav])
+        return res.returncode
 
     cmd = [exe, "--out", args.out, "--protocol", args.protocol, "--volume", str(args.volume)]
     if args.text:
