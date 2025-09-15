@@ -1,0 +1,6 @@
+[submodule "ggwave"]
+	path = ggwave
+	url = https://github.com/ggerganov/ggwave.git
+[submodule "gibberlink-translator"]
+	path = gibberlink-translator
+	url = https://github.com/yanivlevydfs/gibberlink-translator.git

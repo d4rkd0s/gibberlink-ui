@@ -1,0 +1,23 @@
+﻿# Rust/Target
+/target/
+/gibberlink-tx/target/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+.env/
+
+# Editors/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Artifacts
+*.wav
+*.log
+
+# Pip bootstrap (if any)
+get-pip.py
