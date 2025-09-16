@@ -3,7 +3,7 @@ name: Release (Windows x86/x64)
 on:
   push:
     tags:
-      - 'v*'
+      - '*'
   workflow_dispatch: {}
 
 permissions:
@@ -56,11 +56,13 @@ jobs:
           name: gibberlink-${{ matrix.target }}
           path: gibberlink-windows-${{ matrix.target }}.zip
 
-      - name: Attach to GitHub Release
+      - name: Create/Update GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
           files: gibberlink-windows-${{ matrix.target }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
