@@ -21,28 +21,42 @@ from typing import Optional
 
 
 def ensure_binary() -> str:
-    root = os.path.dirname(os.path.abspath(__file__))
-    exe = os.path.join(root, "gibberlink-tx", "target", "release", "gibberlink-tx")
+    # Prefer a bundled CLI when running as a packaged (PyInstaller) app
+    exe_name = "gibberlink-tx.exe" if os.name == "nt" else "gibberlink-tx"
+    # 1) If running from a PyInstaller onefile bundle, data is under sys._MEIPASS
+    bundle_dir = getattr(sys, "_MEIPASS", None)
+    if bundle_dir:
+        bundled = os.path.join(bundle_dir, exe_name)
+        if os.path.exists(bundled):
+            return bundled
+
+    # 2) Look next to the executable when frozen (onedir) or next to this file when not
+    here = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.abspath(__file__))
+    local_cli = os.path.join(here, exe_name)
+    if os.path.exists(local_cli):
+        return local_cli
+
+    # 3) Development tree path
+    dev_cli = os.path.join(here, "gibberlink-tx", "target", "release", "gibberlink-tx")
     if os.name == "nt":
-        exe += ".exe"
-    if os.path.exists(exe):
-        return exe
-    # Try building it
+        dev_cli += ".exe"
+    if os.path.exists(dev_cli):
+        return dev_cli
+
+    # 4) Try building it from source
     print("Building Rust gibberlink-tx binary (first run only)...", flush=True)
     try:
-        subprocess.check_call(["cargo", "build", "--release"], cwd=os.path.join(root, "gibberlink-tx"))
+        subprocess.check_call(["cargo", "build", "--release"], cwd=os.path.join(here, "gibberlink-tx"))
     except FileNotFoundError:
         print("Cargo not found. Please install Rust (https://rustup.rs/) to build the binary.", file=sys.stderr)
         sys.exit(2)
     except subprocess.CalledProcessError as e:
         print(f"Cargo build failed with code {e.returncode}", file=sys.stderr)
         sys.exit(e.returncode)
-    if not os.path.exists(exe):
+    if not os.path.exists(dev_cli):
         print("Build succeeded but binary not found. Please check the build output.", file=sys.stderr)
         sys.exit(3)
-    return exe
-
-
+    return dev_cli
 def run_ui() -> int:
     try:
         import tkinter as tk
