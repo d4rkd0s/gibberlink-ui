@@ -1,7 +1,7 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.5.13/schema.json",
   "files": {
-    "includes": ["**", "!**/dist", "!**/.vendor", "!legacy", "!**/node_modules", "!**/*.toon"]
+    "includes": ["**", "!**/dist", "!**/.vendor", "!legacy", "!**/node_modules", "!**/*.toon", "!**/data.generated.ts"]
   },
   "formatter": {
     "indentStyle": "space",
@@ -10,8 +10,14 @@
   },
   "linter": {
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "suspicious": { "noExplicitAny": "off" }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["**/test/**"],
+      "linter": { "rules": { "style": { "noNonNullAssertion": "off" } } }
+    }
+  ]
 }

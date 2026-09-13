@@ -1,0 +1,283 @@
+# Runic Tomes Lexicon
+# The oldest attested runic system (Elder Futhark) is layer 0. Later systems ride on top
+# and inherit from their parent when a letter or rune is not defined in the layer itself.
+#
+# Every rune row is checked in CI: glyph == code point, uname == Unicode 17.0 UnicodeData,
+# and `reversible` must match what the transliteration rules actually do.
+# Code points are written U+XXXX on purpose: TOON reads bare 16E0 as a number.
+# Research and sources: docs/research/runes.md
+#
+# Latin -> runes is a MODERN CONVENTION (no scholarly standard exists for that direction).
+# Runes -> Latin uses the conventional runological transliteration of each rune.
+meta:
+  name: runic-tomes-lexicon
+  version: 1.0.0
+  unicode: "17.0"
+  license: MIT
+  wordSeparator: ᛫
+# parent = historical lineage. rulesFrom = which set fills in runes and Latin rules this set
+# does not define itself (Younger Futhark has none, so Elder runes never leak into it).
+sets[8|]{id|name|layer|parent|rulesFrom|from|to|historical|note|source}:
+  elder|Elder Futhark|0|""|""|150|800|true|"Oldest securely read inscription: Vimose comb (harja, c. 160 CE). Kylver stone (c. 400) is the first full row. Most inscriptions use no word dividers."|"https://en.wikipedia.org/wiki/Elder_Futhark"
+  futhorc|Anglo-Frisian Futhorc|1|elder|elder|450|1100|true|Grows from 28 to about 33 runes; Northumbrian additions and manuscript-only cealc.|"https://en.wikipedia.org/wiki/Anglo-Saxon_runes"
+  younger-long|Younger Futhark (long-branch)|1|elder|""|800|1100|true|Reduced to 16 runes by the late 8th century; mostly carved on stone.|"https://en.wikipedia.org/wiki/Younger_Futhark"
+  younger-short|Younger Futhark (short-twig)|2|younger-long|younger-long|800|1100|true|Also called Rök runes; mostly carved on wood. Staveless (Hälsinge) runes are allographs of these and have no code points.|"https://en.wikipedia.org/wiki/Younger_Futhark"
+  medieval|Medieval (dotted) runes|2|younger-long|younger-long|1100|1500|true|Dots distinguish sound pairs; dotting was optional and spelling varied.|"https://en.wikipedia.org/wiki/Medieval_runes"
+  franks-casket|Franks Casket cryptic runes|3|futhorc|futhorc|700|750|true|Cryptic vowel forms from one early 8th-century whalebone casket; Futhorc otherwise.|"https://en.wikipedia.org/wiki/Franks_Casket"
+  golden-numbers|Golden number runes|3|medieval|medieval|""|""|true|Calendar symbols for golden numbers 17 to 19 only. Runes had no digit system; digits are never converted.|"https://www.unicode.org/charts/PDF/U16A0.pdf"
+  tolkien|Tolkienian runes|3|futhorc|futhorc|1937|""|false|Modern and fictional. Based on Anglo-Saxon runes. Full Cirth is Private Use Area only and deliberately excluded.|"https://www.unicode.org/L2/L2011/11096r-n4013r-runic-additions.pdf"
+runes[105|]{set|order|group|cp|glyph|uname|name|translit|ipa|reversible|note}:
+  elder|1|Freyr's ætt|U+16A0|ᚠ|RUNIC LETTER FEHU FEOH FE F|*fehu|f|f; ɸ|true|""
+  elder|2|Freyr's ætt|U+16A2|ᚢ|RUNIC LETTER URUZ UR U|*ūruz|u|u(ː)|true|""
+  elder|3|Freyr's ætt|U+16A6|ᚦ|RUNIC LETTER THURISAZ THURS THORN|*þurisaz|þ|θ; ð|true|""
+  elder|4|Freyr's ætt|U+16A8|ᚨ|RUNIC LETTER ANSUZ A|*ansuz|a|a(ː)|true|""
+  elder|5|Freyr's ætt|U+16B1|ᚱ|RUNIC LETTER RAIDO RAD REID R|*raidō|r|r|true|""
+  elder|6|Freyr's ætt|U+16B2|ᚲ|RUNIC LETTER KAUNA|*kaunan|k|k|true|""
+  elder|7|Freyr's ætt|U+16B7|ᚷ|RUNIC LETTER GEBO GYFU G|*gebō|g|ɡ; ɣ|true|""
+  elder|8|Freyr's ætt|U+16B9|ᚹ|RUNIC LETTER WUNJO WYNN W|*wunjō|w|w|true|""
+  elder|9|Heimdall's ætt|U+16BA|ᚺ|RUNIC LETTER HAGLAZ H|*hagalaz|h|h|true|Single-bar form. Double-bar ᚻ is encoded separately (Futhorc haegl).
+  elder|10|Heimdall's ætt|U+16BE|ᚾ|RUNIC LETTER NAUDIZ NYD NAUD N|*naudiz|n|n|true|""
+  elder|11|Heimdall's ætt|U+16C1|ᛁ|RUNIC LETTER ISAZ IS ISS I|*īsaz|i|i(ː)|true|""
+  elder|12|Heimdall's ætt|U+16C3|ᛃ|RUNIC LETTER JERAN J|*jēra|j|j|true|""
+  elder|13|Heimdall's ætt|U+16C7|ᛇ|RUNIC LETTER IWAZ EOH|*ī(h)waz|ï|æː?; ɨ?; ç?|true|Sound value disputed.
+  elder|14|Heimdall's ætt|U+16C8|ᛈ|RUNIC LETTER PERTHO PEORTH P|*perþō|p|p|true|""
+  elder|15|Heimdall's ætt|U+16C9|ᛉ|RUNIC LETTER ALGIZ EOLHX|*algiz|z|z|true|Later ʀ.
+  elder|16|Heimdall's ætt|U+16CA|ᛊ|RUNIC LETTER SOWILO S|*sōwilō|s|s|true|""
+  elder|17|Tyr's ætt|U+16CF|ᛏ|RUNIC LETTER TIWAZ TIR TYR T|*tīwaz|t|t|true|""
+  elder|18|Tyr's ætt|U+16D2|ᛒ|RUNIC LETTER BERKANAN BEORC BJARKAN B|*berkanan|b|b; β|true|""
+  elder|19|Tyr's ætt|U+16D6|ᛖ|RUNIC LETTER EHWAZ EH E|*ehwaz|e|e(ː)|true|""
+  elder|20|Tyr's ætt|U+16D7|ᛗ|RUNIC LETTER MANNAZ MAN M|*mannaz|m|m|true|""
+  elder|21|Tyr's ætt|U+16DA|ᛚ|RUNIC LETTER LAUKAZ LAGU LOGR L|*laguz|l|l|true|Name also reconstructed as *laukaz.
+  elder|22|Tyr's ætt|U+16DC|ᛜ|RUNIC LETTER INGWAZ|*ingwaz|ŋ|ŋ|true|""
+  elder|23|Tyr's ætt|U+16DE|ᛞ|RUNIC LETTER DAGAZ DAEG D|*dagaz|d|d; ð|true|Kylver and some bracteates order ᛟ before ᛞ.
+  elder|24|Tyr's ætt|U+16DF|ᛟ|RUNIC LETTER OTHALAN ETHEL O|*ōþalan|o|o(ː)|true|""
+  futhorc|4|base|U+16A9|ᚩ|RUNIC LETTER OS O|ōs|o|o(ː)|true|Earliest on the Undley bracteate (5th century).
+  futhorc|6|base|U+16B3|ᚳ|RUNIC LETTER CEN|cēn|c|k; tʃ|true|""
+  futhorc|9|base|U+16BB|ᚻ|RUNIC LETTER HAEGL H|hægl|h|h; x|true|""
+  futhorc|12|base|U+16C4|ᛄ|RUNIC LETTER GER|gēr|j|j|true|""
+  futhorc|15|base|U+16C9|ᛉ|RUNIC LETTER ALGIZ EOLHX|eolh|x|ks|true|Rune name only; not used as a sound.
+  futhorc|16|base|U+16CB|ᛋ|RUNIC LETTER SIGEL LONG-BRANCH-SOL S|sigel|s|s|true|""
+  futhorc|22|base|U+16DD|ᛝ|RUNIC LETTER ING|ing|ŋ|ŋ(ɡ)|true|""
+  futhorc|23|base|U+16DF|ᛟ|RUNIC LETTER OTHALAN ETHEL O|ēþel|œ|ø(ː)|true|""
+  futhorc|25|base|U+16AA|ᚪ|RUNIC LETTER AC A|āc|a|ɑ(ː)|true|""
+  futhorc|26|base|U+16AB|ᚫ|RUNIC LETTER AESC|æsc|æ|æ(ː)|true|""
+  futhorc|27|base|U+16A3|ᚣ|RUNIC LETTER YR|ȳr|y|y(ː)|true|""
+  futhorc|28|base|U+16E1|ᛡ|RUNIC LETTER IOR|īor|io|io|true|""
+  futhorc|29|base|U+16E0|ᛠ|RUNIC LETTER EAR|ēar|ea|æɑ|true|""
+  futhorc|30|Northumbrian|U+16E2|ᛢ|RUNIC LETTER CWEORTH|cweorð|q|kw|true|""
+  futhorc|31|Northumbrian|U+16E3|ᛣ|RUNIC LETTER CALC|calc|k|k|true|""
+  futhorc|32|Northumbrian|U+16B8|ᚸ|RUNIC LETTER GAR|gār|ḡ|ɡ|true|""
+  futhorc|33|Northumbrian|U+16E5|ᛥ|RUNIC LETTER STAN|stān|st|st|false|Reads as st; typing st gives ᛋᛏ.
+  futhorc|34|manuscript|U+16E4|ᛤ|RUNIC LETTER CEALC|cealc|k̄|k|true|Manuscript-only.
+  younger-long|1|Freyr's ætt|U+16A0|ᚠ|RUNIC LETTER FEHU FEOH FE F|fé|f|f; v|true|""
+  younger-long|2|Freyr's ætt|U+16A2|ᚢ|RUNIC LETTER URUZ UR U|úr|u|u; y; o; w|true|""
+  younger-long|3|Freyr's ætt|U+16A6|ᚦ|RUNIC LETTER THURISAZ THURS THORN|þurs|þ|θ; ð|true|""
+  younger-long|4|Freyr's ætt|U+16AC|ᚬ|RUNIC LETTER LONG-BRANCH-OSS O|áss|ą|ã; o|true|""
+  younger-long|5|Freyr's ætt|U+16B1|ᚱ|RUNIC LETTER RAIDO RAD REID R|reið|r|r|true|""
+  younger-long|6|Freyr's ætt|U+16B4|ᚴ|RUNIC LETTER KAUN K|kaun|k|k; ɡ; ŋ|true|""
+  younger-long|7|Heimdall's ætt|U+16BC|ᚼ|RUNIC LETTER LONG-BRANCH-HAGALL H|hagall|h|h|true|""
+  younger-long|8|Heimdall's ætt|U+16BE|ᚾ|RUNIC LETTER NAUDIZ NYD NAUD N|nauðr|n|n|true|""
+  younger-long|9|Heimdall's ætt|U+16C1|ᛁ|RUNIC LETTER ISAZ IS ISS I|íss|i|i; e; j|true|""
+  younger-long|10|Heimdall's ætt|U+16C5|ᛅ|RUNIC LETTER LONG-BRANCH-AR AE|ár|a|a; æ|true|""
+  younger-long|11|Heimdall's ætt|U+16CB|ᛋ|RUNIC LETTER SIGEL LONG-BRANCH-SOL S|sól|s|s|true|""
+  younger-long|12|Tyr's ætt|U+16CF|ᛏ|RUNIC LETTER TIWAZ TIR TYR T|Týr|t|t; d|true|""
+  younger-long|13|Tyr's ætt|U+16D2|ᛒ|RUNIC LETTER BERKANAN BEORC BJARKAN B|bjarkan|b|b; p|true|""
+  younger-long|14|Tyr's ætt|U+16D8|ᛘ|RUNIC LETTER LONG-BRANCH-MADR M|maðr|m|m|true|""
+  younger-long|15|Tyr's ætt|U+16DA|ᛚ|RUNIC LETTER LAUKAZ LAGU LOGR L|lögr|l|l|true|""
+  younger-long|16|Tyr's ætt|U+16E6|ᛦ|RUNIC LETTER LONG-BRANCH-YR|yr|ʀ|ʀ; y|true|""
+  younger-short|1|Freyr's ætt|U+16A0|ᚠ|RUNIC LETTER FEHU FEOH FE F|fé|f|f; v|true|""
+  younger-short|2|Freyr's ætt|U+16A2|ᚢ|RUNIC LETTER URUZ UR U|úr|u|u; y; o; w|true|""
+  younger-short|3|Freyr's ætt|U+16A6|ᚦ|RUNIC LETTER THURISAZ THURS THORN|þurs|þ|θ; ð|true|""
+  younger-short|4|Freyr's ætt|U+16AD|ᚭ|RUNIC LETTER SHORT-TWIG-OSS O|áss|ą|ã; o|true|""
+  younger-short|5|Freyr's ætt|U+16B1|ᚱ|RUNIC LETTER RAIDO RAD REID R|reið|r|r|true|""
+  younger-short|6|Freyr's ætt|U+16B4|ᚴ|RUNIC LETTER KAUN K|kaun|k|k; ɡ; ŋ|true|""
+  younger-short|7|Heimdall's ætt|U+16BD|ᚽ|RUNIC LETTER SHORT-TWIG-HAGALL H|hagall|h|h|true|""
+  younger-short|8|Heimdall's ætt|U+16BF|ᚿ|RUNIC LETTER SHORT-TWIG-NAUD N|nauðr|n|n|true|""
+  younger-short|9|Heimdall's ætt|U+16C1|ᛁ|RUNIC LETTER ISAZ IS ISS I|íss|i|i; e; j|true|""
+  younger-short|10|Heimdall's ætt|U+16C6|ᛆ|RUNIC LETTER SHORT-TWIG-AR A|ár|a|a; æ|true|""
+  younger-short|11|Heimdall's ætt|U+16CC|ᛌ|RUNIC LETTER SHORT-TWIG-SOL S|sól|s|s|true|""
+  younger-short|12|Tyr's ætt|U+16D0|ᛐ|RUNIC LETTER SHORT-TWIG-TYR T|Týr|t|t; d|true|""
+  younger-short|13|Tyr's ætt|U+16D3|ᛓ|RUNIC LETTER SHORT-TWIG-BJARKAN B|bjarkan|b|b; p|true|""
+  younger-short|14|Tyr's ætt|U+16D9|ᛙ|RUNIC LETTER SHORT-TWIG-MADR M|maðr|m|m|true|""
+  younger-short|15|Tyr's ætt|U+16DA|ᛚ|RUNIC LETTER LAUKAZ LAGU LOGR L|lögr|l|l|true|""
+  younger-short|16|Tyr's ætt|U+16E7|ᛧ|RUNIC LETTER SHORT-TWIG-YR|yr|ʀ|ʀ; y|true|""
+  medieval|17|dotted|U+16C2|ᛂ|RUNIC LETTER E|e|e|e|true|Dotted i.
+  medieval|18|dotted|U+16A4|ᚤ|RUNIC LETTER Y|y|y|y|true|Dotted u.
+  medieval|19|dotted|U+16AF|ᚯ|RUNIC LETTER OE|ø|ø|ø|true|""
+  medieval|20|dotted|U+16AE|ᚮ|RUNIC LETTER O|o|o|o|true|""
+  medieval|21|dotted|U+16B0|ᚰ|RUNIC LETTER ON|ǫ|ǫ|õ|true|Nasal o.
+  medieval|22|dotted|U+16B5|ᚵ|RUNIC LETTER G|g|g|ɡ|true|Dotted k.
+  medieval|23|dotted|U+16D1|ᛑ|RUNIC LETTER D|d|d|d|true|Dotted t.
+  medieval|24|dotted|U+16D4|ᛔ|RUNIC LETTER DOTTED-P|p|p|p|true|""
+  medieval|25|dotted|U+16D5|ᛕ|RUNIC LETTER OPEN-P|p|p|p|false|Variant p; typing p gives dotted ᛔ.
+  medieval|26|dotted|U+16A1|ᚡ|RUNIC LETTER V|v|v|v|true|""
+  medieval|27|dotted|U+16A5|ᚥ|RUNIC LETTER W|w|w|w|true|""
+  medieval|28|dotted|U+16A7|ᚧ|RUNIC LETTER ETH|ð|ð|ð|true|""
+  medieval|29|dotted|U+16C0|ᛀ|RUNIC LETTER DOTTED-N|n|n|n|false|Variant n; typing n gives ᚾ.
+  medieval|30|dotted|U+16DB|ᛛ|RUNIC LETTER DOTTED-L|l|l|l|false|Variant l; typing l gives ᛚ.
+  medieval|31|dotted|U+16CD|ᛍ|RUNIC LETTER C|c|c|s; k|true|""
+  medieval|32|dotted|U+16CE|ᛎ|RUNIC LETTER Z|z|z|s|true|""
+  medieval|33|dotted|U+16E9|ᛩ|RUNIC LETTER Q|q|q|k|true|""
+  medieval|34|dotted|U+16EA|ᛪ|RUNIC LETTER X|x|x|ks|true|""
+  medieval|35|dotted|U+16E8|ᛨ|RUNIC LETTER ICELANDIC-YR|yr|ʀ|y; ʀ|false|Icelandic variant; typing ʀ gives ᛦ.
+  medieval|36|dotted|U+16B6|ᚶ|RUNIC LETTER ENG|eng|ŋ|ŋ|true|""
+  franks-casket|1|cryptic|U+16F4|ᛴ|RUNIC LETTER FRANKS CASKET OS|ōs|o|o|true|""
+  franks-casket|2|cryptic|U+16F5|ᛵ|RUNIC LETTER FRANKS CASKET IS|īs|i|i|true|""
+  franks-casket|3|cryptic|U+16F6|ᛶ|RUNIC LETTER FRANKS CASKET EH|eh|e|e|true|""
+  franks-casket|4|cryptic|U+16F7|ᛷ|RUNIC LETTER FRANKS CASKET AC|āc|a|a|true|""
+  franks-casket|5|cryptic|U+16F8|ᛸ|RUNIC LETTER FRANKS CASKET AESC|æsc|æ|æ|true|""
+  golden-numbers|17|calendar|U+16EE|ᛮ|RUNIC ARLAUG SYMBOL|arlaug|"17"|""|false|Golden number 17. Keyboard only.
+  golden-numbers|18|calendar|U+16EF|ᛯ|RUNIC TVIMADUR SYMBOL|tvimadur|"18"|""|false|Golden number 18. Keyboard only.
+  golden-numbers|19|calendar|U+16F0|ᛰ|RUNIC BELGTHOR SYMBOL|belgthor|"19"|""|false|Golden number 19. Keyboard only.
+  tolkien|1|Tolkienian|U+16F1|ᛱ|RUNIC LETTER K|k|k|k|true|""
+  tolkien|2|Tolkienian|U+16F2|ᛲ|RUNIC LETTER SH|sh|sh|ʃ|true|""
+  tolkien|3|Tolkienian|U+16F3|ᛳ|RUNIC LETTER OO|oo|oo|uː|true|""
+separators[3|]{cp|glyph|uname|label}:
+  U+16EB|᛫|RUNIC SINGLE PUNCTUATION|single dot
+  U+16EC|᛬|RUNIC MULTIPLE PUNCTUATION|double dot
+  U+16ED|᛭|RUNIC CROSS PUNCTUATION|cross
+# Latin -> runes rules, matched greedily longest-first after NFC + lower-casing.
+# A set uses its own rules first, then its parent's. Unmatched accented letters fall back
+# to their base letter; anything still unmatched (digits, punctuation) passes through.
+# convention=true marks a modern choice for a letter the set has no rune for.
+latin[140|]{set|latin|runes|convention}:
+  elder|a|ᚨ|false
+  elder|b|ᛒ|false
+  elder|c|ᚲ|true
+  elder|d|ᛞ|false
+  elder|e|ᛖ|false
+  elder|f|ᚠ|false
+  elder|g|ᚷ|false
+  elder|h|ᚺ|false
+  elder|i|ᛁ|false
+  elder|j|ᛃ|false
+  elder|k|ᚲ|false
+  elder|l|ᛚ|false
+  elder|m|ᛗ|false
+  elder|n|ᚾ|false
+  elder|o|ᛟ|false
+  elder|p|ᛈ|false
+  elder|q|ᚲᚹ|true
+  elder|r|ᚱ|false
+  elder|s|ᛊ|false
+  elder|t|ᛏ|false
+  elder|u|ᚢ|false
+  elder|v|ᚹ|true
+  elder|w|ᚹ|false
+  elder|x|ᚲᛊ|true
+  elder|y|ᛁ|true
+  elder|z|ᛉ|false
+  elder|th|ᚦ|false
+  elder|þ|ᚦ|false
+  elder|ð|ᚦ|false
+  elder|ng|ᛜ|false
+  elder|ŋ|ᛜ|false
+  elder|ï|ᛇ|false
+  elder|ʀ|ᛉ|false
+  elder|æ|ᚨ|true
+  elder|ø|ᛟ|true
+  elder|œ|ᛟ|true
+  futhorc|a|ᚪ|false
+  futhorc|æ|ᚫ|false
+  futhorc|c|ᚳ|false
+  futhorc|k|ᛣ|false
+  futhorc|k̄|ᛤ|false
+  futhorc|h|ᚻ|false
+  futhorc|j|ᛄ|false
+  futhorc|o|ᚩ|false
+  futhorc|œ|ᛟ|false
+  futhorc|ø|ᛟ|true
+  futhorc|s|ᛋ|false
+  futhorc|x|ᛉ|false
+  futhorc|y|ᚣ|false
+  futhorc|q|ᛢ|false
+  futhorc|z|ᛋ|true
+  futhorc|v|ᚠ|true
+  futhorc|ng|ᛝ|false
+  futhorc|ŋ|ᛝ|false
+  futhorc|ea|ᛠ|false
+  futhorc|io|ᛡ|false
+  futhorc|ia|ᛡ|false
+  futhorc|eo|ᛇ|false
+  futhorc|ḡ|ᚸ|false
+  younger-long|a|ᛅ|false
+  younger-long|b|ᛒ|false
+  younger-long|c|ᚴ|true
+  younger-long|d|ᛏ|false
+  younger-long|e|ᛁ|false
+  younger-long|f|ᚠ|false
+  younger-long|g|ᚴ|false
+  younger-long|h|ᚼ|false
+  younger-long|i|ᛁ|false
+  younger-long|j|ᛁ|false
+  younger-long|k|ᚴ|false
+  younger-long|l|ᛚ|false
+  younger-long|m|ᛘ|false
+  younger-long|n|ᚾ|false
+  younger-long|o|ᚬ|false
+  younger-long|p|ᛒ|false
+  younger-long|q|ᚴ|true
+  younger-long|r|ᚱ|false
+  younger-long|s|ᛋ|false
+  younger-long|t|ᛏ|false
+  younger-long|u|ᚢ|false
+  younger-long|v|ᚠ|false
+  younger-long|w|ᚢ|false
+  younger-long|x|ᚴᛋ|true
+  younger-long|y|ᚢ|false
+  younger-long|z|ᛦ|true
+  younger-long|th|ᚦ|false
+  younger-long|þ|ᚦ|false
+  younger-long|ð|ᚦ|false
+  younger-long|ng|ᚾᚴ|false
+  younger-long|ŋ|ᚴ|false
+  younger-long|ą|ᚬ|false
+  younger-long|ʀ|ᛦ|false
+  younger-long|æ|ᛅ|false
+  younger-long|ø|ᚬ|true
+  younger-long|œ|ᚬ|true
+  younger-long|ï|ᛁ|true
+  younger-short|a|ᛆ|false
+  younger-short|æ|ᛆ|false
+  younger-short|o|ᚭ|false
+  younger-short|ą|ᚭ|false
+  younger-short|ø|ᚭ|true
+  younger-short|œ|ᚭ|true
+  younger-short|h|ᚽ|false
+  younger-short|n|ᚿ|false
+  younger-short|ng|ᚿᚴ|false
+  younger-short|s|ᛌ|false
+  younger-short|t|ᛐ|false
+  younger-short|d|ᛐ|false
+  younger-short|b|ᛓ|false
+  younger-short|p|ᛓ|false
+  younger-short|m|ᛙ|false
+  younger-short|z|ᛧ|true
+  younger-short|ʀ|ᛧ|false
+  younger-short|x|ᚴᛌ|true
+  medieval|e|ᛂ|false
+  medieval|y|ᚤ|false
+  medieval|ø|ᚯ|false
+  medieval|œ|ᚯ|true
+  medieval|o|ᚮ|false
+  medieval|ǫ|ᚰ|false
+  medieval|g|ᚵ|false
+  medieval|d|ᛑ|false
+  medieval|p|ᛔ|false
+  medieval|v|ᚡ|false
+  medieval|w|ᚥ|false
+  medieval|ð|ᚧ|false
+  medieval|c|ᛍ|false
+  medieval|z|ᛎ|false
+  medieval|q|ᛩ|false
+  medieval|x|ᛪ|false
+  medieval|ŋ|ᚶ|false
+  medieval|ng|ᚾᚵ|false
+  franks-casket|o|ᛴ|false
+  franks-casket|i|ᛵ|false
+  franks-casket|e|ᛶ|false
+  franks-casket|a|ᛷ|false
+  franks-casket|æ|ᛸ|false
+  tolkien|k|ᛱ|false
+  tolkien|sh|ᛲ|false
+  tolkien|oo|ᛳ|false
