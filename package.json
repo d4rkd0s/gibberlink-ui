@@ -16,7 +16,8 @@
     "build:wasm": "npm run build -w @gibberlink/ggwave-wasm",
     "test": "vitest run",
     "typecheck": "tsc -b",
-    "lint": "biome check ."
+    "lint": "biome check .",
+    "e2e": "npm run e2e -w @gibberlink/web"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.13",

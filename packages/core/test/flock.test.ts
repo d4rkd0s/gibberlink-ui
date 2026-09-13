@@ -39,11 +39,21 @@ describe("flock", () => {
     expect(first).toEqual([]);
   });
 
-  it("keeps birds in migration order: earlier glyphs always lead", () => {
+  it("birds enter at the right edge and fly left", () => {
+    const flock = createFlock(glyphs, { ...view, seed: 3 });
+    const [bird] = flock.step(glyphs[0]!.start + 0.01);
+    expect(bird!.x).toBeGreaterThan(view.width);
+    let frame = flock.step(glyphs[0]!.start + 0.01);
+    for (let t = glyphs[0]!.start; t <= glyphs[0]!.start + 1; t += 1 / 60) frame = flock.step(t);
+    const later = frame.find((b) => b.index === 0);
+    expect(later!.x).toBeLessThan(bird!.x - 100);
+  });
+
+  it("keeps birds in reading order: earlier glyphs lead on the left", () => {
     for (const frame of run(6)) {
       const sorted = [...frame].sort((a, b) => a.index - b.index);
       for (let i = 1; i < sorted.length; i++) {
-        expect(sorted[i - 1]!.x, `frame bird ${sorted[i]!.index}`).toBeGreaterThan(sorted[i]!.x);
+        expect(sorted[i - 1]!.x, `frame bird ${sorted[i]!.index}`).toBeLessThan(sorted[i]!.x);
       }
     }
   });
@@ -88,7 +98,7 @@ describe("flock", () => {
     const flock = createFlock(glyphs, { ...view, seed: 1, reducedMotion: true });
     const f = flock.step(2);
     const sorted = [...f].sort((x, y) => x.index - y.index);
-    for (let i = 1; i < sorted.length; i++) expect(sorted[i - 1]!.x).toBeGreaterThan(sorted[i]!.x);
+    for (let i = 1; i < sorted.length; i++) expect(sorted[i - 1]!.x).toBeLessThan(sorted[i]!.x);
     expect(new Set(f.map((b) => b.y)).size).toBe(1);
   });
 });

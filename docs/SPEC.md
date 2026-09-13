@@ -1,11 +1,11 @@
 # GibberLink UI v2 — Spec
 
-_Status: DRAFT, 2026-09-13. Written before any v2 code (spec → design → tests → code)._
-_Absorbs `d4rkd0s/gibber-to-runic` (private, empty repo; only artifact was its description "Convert runes to gibberlink audio")._
+_Status: ACTIVE, updated 2026-09-13. Decisions from Logan on 2026-09-13 are folded in (§10)._
+_Absorbs `d4rkd0s/gibber-to-runic` (private, empty; its only artifact was the description "Convert runes to gibberlink audio")._
 
 ## 1. What it is
 
-A small tool that converts between three forms of a message, in any direction:
+A small tool that converts a message between three forms, in any direction:
 
 ```
         text  ⇄  runes
@@ -13,143 +13,192 @@ A small tool that converts between three forms of a message, in any direction:
        GibberLink audio (ggwave)
 ```
 
-Runs entirely in the browser (plus a CLI). No server, no account, no network after load.
+It runs entirely in the browser (and later as a CLI). There is no server and no account, and nothing touches the network after the page loads.
 
 ## 2. Why rebuild
 
-v0 (Sep 2025, moves to `legacy/`) proved the idea: Tkinter → Python wrapper → Rust CLI → ggwave C++.
-Problems found on review:
-- Needs Python + Tkinter + Cargo; Windows-first; no tests, no releases, no license.
-- Decodes WAV files only; no live mic, which is the thing people actually want.
-- Git submodules (`ggwave`, `gibberlink-translator`) declared but empty; the second one is an unrelated app and was never used.
-- Python decode used `ggwave` from PyPI while encode used vendored C++: two codec builds that can drift.
-- Nobody noticed the npm `ggwave` package is frozen at 0.4.0 (2022) while upstream is 0.4.3 with Emscripten fixes. v2 must not repeat that.
+v0 (Sep 2025, now `legacy/`) was Tkinter → Python wrapper → Rust CLI → ggwave C++. Review found:
+- It needed Python, Tkinter and Cargo, targeted Windows first, and had no tests, releases or license.
+- It decoded WAV files only, with no live microphone.
+- Both git submodules were empty, and one (`gibberlink-translator`) was an unrelated app.
+- Encode used vendored C++ while decode used PyPI `ggwave`: two separate codec builds.
+- npm `ggwave` has been frozen at 0.4.0 since 2022, while upstream is at 0.4.3.
 
 ## 3. Users & jobs
 
 | User | Job |
 |---|---|
 | Curious viewer of the GibberLink demo | "What are those beeps saying?" → live mic decode |
-| Rune / fantasy / tabletop fan | Type a name, see it in runes, play it as sound; hear a sound, see runes |
-| Tinkerer / maker | Generate payload WAV, play to a device, test reception |
-| Developer | Script it → CLI + importable `core` |
-| Educator | Show data-over-sound visually (spectrogram) |
+| Rune / fantasy / history fan | Type a name, watch it fly as runes while it sounds; hear a sound, read runes |
+| Tinkerer / maker | Generate a payload WAV and play it to a device |
+| Developer | Script it with `@gibberlink/core` (and the CLI, M3) |
+| Educator | Show data-over-sound, and runic history with sources |
 
 ## 4. Scope
 
 ### Will do (v1.0)
-- **Encode**: text or runes → audio. Protocol + volume, Play, Download WAV, live UTF-8 byte counter.
-- **Decode file**: drag/drop or pick WAV/MP3/OGG/WebM/M4A → text (browser `decodeAudioData` + resample).
-- **Decode live**: mic → rolling decode into a timestamped transcript; level meter.
-- **Runic**: text ⇄ runes transliteration with selectable rune set; decoded payloads can be shown as text, runes, or both.
-- **Visuals**: live spectrogram for playback and mic.
-- **Transcript**: copy, clear, export `.txt` / `.json`.
-- **Offline PWA**, static deploy to GitHub Pages.
-- **CLI**: `gibberlink encode | decode | runes`.
-- Accessible: keyboard-complete, `aria-live` announcements for decoded messages, WCAG 2.2 AA. Runes always have a Latin reading available to screen readers.
+- **Compose:** text or runes (typed Latin or the on-screen rune keyboard) → audio.
+  - Controls: protocol, volume, a byte budget shown in bytes and in runes, Play, Download WAV.
+- **Flight:** while a message plays, its runes fly across a sky band like a flock of migrating birds.
+  - They enter from the right and fly left. Each rune leaves at the moment its bytes are on air, fades in, and fades out as it leaves.
+  - Order is guaranteed: the first rune always leads on the left, and a faint thread links the flock in order.
+  - Reduced motion: runes glide in a straight line, still in order.
+- **Listen:** mic (AudioWorklet → Web Worker decoder) and audio file drop.
+  - The transcript shows runes with their Latin reading, or text with a rune view. Received messages replay as a flight.
+  - Transcript actions: copy, clear, export `.txt` / `.json`.
+- **Runes that always render:**
+  - Canvas and inline rune display draw from embedded SVG outlines, so no font is needed.
+  - Text inputs use a bundled WOFF2 subset of Noto Sans Runic (OFL). macOS and iOS ship no runic font.
+- Offline PWA, static deploy to GitHub Pages.
+- CLI `gibberlink encode | decode | runes` (M3).
+- Accessible: keyboard-complete, `aria-live` announcements, rune images labelled with their Latin reading, zero axe serious/critical findings.
 
 ### Will not do (v1.0)
-- No backend, telemetry, analytics, accounts.
-- No encryption; document that payloads are plaintext anyone can decode.
-- No custom audio framing; ggwave protocols only, so we interoperate with real GibberLink.
-- No multi-message chunking for long text (Later).
-- No native desktop builds (PWA installs on desktop).
+- No backend, telemetry or accounts.
+- No encryption. Payloads are plaintext that anyone can decode.
+- No custom audio framing: ggwave protocols only, so we stay interoperable.
+- No DT/MT ggwave protocols. Upstream supports them only with fixed-length payloads (ggwave.cpp rejects mono-tone for variable length and skips it on receive).
+- No Tolkien Cirth or Dalecarlian runes. They aren't in Unicode, and Private Use Area code points collide with other agreements.
+- No multi-message chunking for text over 140 bytes (Later).
 
 ## 5. Runic design
 
-Runes are Unicode (Runic block U+16A0–U+16FF). Transliteration is a **pure, table-driven** module per rune set.
+Research and sources: `docs/research/runes.md`. The data lives in `packages/core/data/runic-lexicon.toon`.
 
-| Rune set | v1.0 | Notes |
+**Layering (oldest first):**
+
+| Layer | Set | Rules come from |
 |---|---|---|
-| Elder Futhark (24) | Default | Best known; `th`→ᚦ, `ng`→ᛜ digraphs |
-| Younger Futhark (16) | Yes | Many-to-one; heavy loss on reverse |
-| Anglo-Saxon Futhorc | Yes | Adds ᚪ ᚫ ᚣ ᛠ etc. |
-| Tolkien Cirth / Dwarvish | Later | Not in Unicode; would need a font. Ask Logan before adding |
+| 0 | **Elder Futhark** (c. 150–800; Vimose comb c. 160 is the oldest securely read inscription) | — |
+| 1 | Anglo-Frisian Futhorc | Elder |
+| 1 | Younger Futhark long-branch | none (so Elder runes never leak in) |
+| 2 | Younger Futhark short-twig | long-branch |
+| 2 | Medieval dotted runes | long-branch |
+| 3 | Franks Casket cryptic vowels | Futhorc |
+| 3 | Golden-number runes (keyboard only) | Medieval |
+| 3 | Tolkienian runes (flagged modern) | Futhorc |
 
-Rules:
-- **text → runes** is deterministic: greedy longest-match digraphs, case-folded, spaces → `᛫` (U+16EB) or kept as space (option), unmapped chars (digits, punctuation) pass through unchanged.
-- **runes → text** is *best effort* and labeled as such in UI: each rune maps to its canonical Latin reading (ᚲ → `k`, never recovers `c`/`q`).
-- Round-trip guarantee is only runes → text → runes (stable), not text → runes → text.
-- **Payload budget**: runic code points are 3 UTF-8 bytes, so a 140-byte ggwave payload holds ~46 runes. UI shows the budget in both bytes and runes.
-- **Wire format choice** (per message, user toggle, default = Runes on the wire):
-  - *Runes on the wire*: send runic UTF-8. Any ggwave receiver shows true runes. 46-rune limit.
-  - *Latin on the wire*: send transliterated Latin, render as runes locally. 140-char limit, but other receivers see Latin.
-- Decoder auto-detects: if payload contains Runic-block code points, show runes primary + Latin reading; else text primary + optional rune view.
+`parent` records historical lineage. `rulesFrom` controls inheritance of runes and Latin rules.
+
+**Lexicon guarantees (all enforced by tests):**
+- Every rune row's glyph equals its code point, and its name matches Unicode 17.0 `UnicodeData.txt`.
+- The lexicon covers all 89 characters of the Unicode Runic block (U+16A0–U+16F8).
+- A set's rules never emit a rune outside that set.
+- Each row's `reversible` flag matches what the rules actually do.
+- Code points are stored as `U+XXXX` (a bare `16E0` would parse as a number in TOON), and the file is valid strict TOON that round-trips through the reference encoder.
+
+**Transliteration:**
+- Latin → runes is a modern convention; no scholarly standard exists for that direction. Rules that fill a gap carry `convention=true`.
+- Processing: NFC, lower-case, greedy longest match, accent fallback, and digits and punctuation pass through unchanged.
+- Runes → Latin uses each rune's conventional transliteration and is best effort. Adjacent readings can re-segment once (ᛏ+ᚺ reads "th", which is written ᚦ); a second pass is a fixed point.
+
+**Separators:**
+- Rune text uses ᛫ (U+16EB) between words by default. ᛬, ᛭, space, or none ("Elder style") are selectable.
+- Latin text uses ordinary spaces.
+
+**Wire format:**
+- Runes on the wire by default (true runic UTF-8), so any ggwave receiver shows real runes.
+- Each rune is 3 bytes, so 46 runes fit in one message.
+- "Text as typed" is available for plain text.
+
+**Rendering:** `runic-glyphs.toon` holds SVG outlines for all 89 code points. They were extracted from a pinned, hash-checked Noto Sans Runic v2.002 and stay under OFL-1.1.
 
 ## 6. Domain model
 
 ```
-Protocol       { id, family: audible|ultrasound|dt|mt, speed: normal|fast|fastest }
-Payload        { bytes: Uint8Array }                 // invariant 1..140 bytes
-RuneSet        { id, name, toRunes(text), toLatin(runes), table }
-Message        { text?, runes?, runeSet?, wire: 'runes'|'latin'|'text' } -> Payload
-Waveform       { samples: Float32Array, sampleRate }
-DecodedMessage { payload, text, runes?, protocol?, at, source: 'file'|'mic' }
-Decoder        stateful: push(Float32Array) -> DecodedMessage[]; chunk-size agnostic
+Protocol       { id: audible|ultrasound × normal|fast|fastest, framesPerTx, bytesPerTx, extra }
+Payload        Uint8Array, invariant 1..140 bytes (UTF-8, NFC)
+Waveform       { samples: Float32Array, sampleRate, protocol, byteTimes: {start,end}[] }
+Decoder        push(Float32Array) -> Uint8Array[]; chunk-size agnostic; dispose()
+RuneSet        { id, name, layer, parent, rulesFrom, from, to, historical, note, source }
+Rune           { set, order, group, cp, glyph, uname, name, translit, ipa, reversible, note }
+GlyphTime      { glyph, index, start, end }   // code point timed by its bytes on air
+Flock          step(t) -> Bird[] { index, glyph, x, y, angle, alpha, scale }   // pure, seeded
 ```
 
-Packages (npm workspaces, one codec build shared by all):
-- `ggwave-wasm` — our reproducible Emscripten build of upstream ggwave at a pinned tag, typed ESM wrapper, checksum-verified.
-- `core` — pure TS: `encode`, `createDecoder`, `wav.write/parse`, `resample`, `runes/*`. No DOM; runs in browser, Node, Bun, Deno.
-- `web` — Svelte app: panels, Web Audio I/O, spectrogram, PWA.
-- `cli` — Node wrapper over `core`.
+Packages (npm workspaces):
 
-## 7. Library selection (re-evaluated 2026-09-13, versions verified on npm)
+| Package | Contents |
+|---|---|
+| `ggwave-wasm` | Emscripten 6.0.9 build of upstream ggwave pinned at `060aec7` (0.4.3 plus the Emscripten fix). Sources are hash-checked, the output is byte-reproducible, and CI rebuilds and diffs it. |
+| `core` | Codec, WAV, byte timeline, runes, glyph outlines and the flock simulation. No DOM; runs in browser, worker and Node. Code uses erasable TypeScript syntax only. |
+| `web` | Svelte 5 app. |
+| `cli` | M3. |
 
-| Concern | Pick | Rejected / why |
+## 7. Library selection (verified 2026-09-13)
+
+| Concern | Pick (version in use) | Rejected / why |
 |---|---|---|
-| Codec | **Self-built ggwave WASM** from `ggerganov/ggwave` pinned tag (0.4.3+), `emsdk` in CI, `-sMODULARIZE -sEXPORT_ES6 -sSINGLE_FILE=0` | npm `ggwave@0.4.0`: stale since 2022, no types, bundles old Emscripten runtime. Kept only as an interop test oracle |
-| Language | **TypeScript 7** (native compiler), strict | TS 5.x slower; 7 is stable at 7.0.x |
-| Build / dev | **Vite 8** (Rolldown) | Webpack/Parcel: heavier, no benefit |
-| UI | **Svelte 5** (runes reactivity, compiles away, built-in a11y warnings) | React: bundle + ceremony for a 3-panel app. Vanilla: state (mic, transcript, settings) gets messy fast. Preact: fine, but Svelte's a11y lint and transitions fit better |
-| Styling | Plain CSS with custom properties, light/dark via `prefers-color-scheme` | Tailwind: unnecessary for ~5 components |
-| Mic capture | **AudioWorklet** → `MessagePort` → decode in a **Web Worker** | ScriptProcessorNode: deprecated |
-| File decode | Browser `decodeAudioData` + `OfflineAudioContext` resample | ffmpeg.wasm: 30 MB, overkill |
-| Spectrogram | Own `AnalyserNode` → `<canvas>` (~100 lines) | wavesurfer.js: large, file-centric |
-| WAV I/O | Own tiny RIFF PCM16/Float32 writer + parser in `core` (tested) | `wavefile`: fine but 11.x is heavy for our need |
-| PWA | **vite-plugin-pwa 1.x** (Workbox) | Hand-rolled SW: easy to get caching wrong |
-| CLI args | Node built-in **`util.parseArgs`** | commander/citty: zero-dep is nicer for a tiny CLI |
-| Library bundling | **tsdown** for `core` + `cli` (ESM + d.ts) | tsup: in maintenance mode |
-| Lint + format | **Biome 2** | ESLint + Prettier: two tools, slower, more config |
-| Unit tests | **Vitest 5** | Jest: ESM/WASM friction |
-| E2E | **Playwright 1.63** + `--use-fake-device-for-media-stream --use-file-for-fake-audio-capture` | Cypress: no fake-mic support |
-| A11y | **@axe-core/playwright** | |
-| Runtime | Node ≥ 22 LTS for CLI/dev | |
-| CI / hosting | GitHub Actions → GitHub Pages; Renovate for deps | Dependabot also fine |
+| Codec | Self-built ggwave WASM (emsdk 6.0.9, 82 KB) | npm `ggwave@0.4.0`: stale since 2022, no types. Kept as an interop test oracle. |
+| Language | TypeScript 7.0.2, strict, `erasableSyntaxOnly` | — |
+| Build / dev | Vite 8.3 | — |
+| UI | Svelte 5.57 | React: too much bundle and ceremony for a 3-panel app. Vanilla JS: mic, transcript and flight state gets messy. |
+| Data format | TOON 4.1 via `@toon-format/toon` 4.1.1 (pinned) | JSON: noisier for big tables. Logan asked for TOON. |
+| Glyph extraction | opentype.js 2 + fontTools `pyftsubset` (build-time only) | — |
+| Mic capture | AudioWorklet → Web Worker | ScriptProcessorNode: deprecated |
+| File decode | `decodeAudioData`; ggwave resamples internally | ffmpeg.wasm: overkill |
+| Animation | Own boids sim in core + Canvas 2D `Path2D` | Physics libraries: unnecessary. DOM nodes: too slow at ~8 runes/s. |
+| WAV | Own writer/parser (PCM 8/16/24/32, float 32/64, extensible) | `wavefile`: heavier than needed |
+| PWA | vite-plugin-pwa 1.3 | — |
+| Lint + format | Biome 2.5 (Svelte files: lint only) | ESLint + Prettier |
+| Unit tests | Vitest 5 | — |
+| E2E | Playwright 1.63 with Chromium fake mic playing generated fixture WAVs; `@axe-core/playwright` 4.13 | — |
+| Runtime | Node ≥ 22 for the library; Node 24 in CI (type stripping for fixtures) | — |
+| CLI (M3) | `util.parseArgs`, tsdown | commander/citty |
 
-## 8. Acceptance tests (write these first)
+## 8. Acceptance tests
 
-Codec
-1. Round-trip: every protocol, `decode(encode("hello gibberlink"))` returns exact bytes.
-2. Byte limit: 140-byte payload encodes; 141 rejected with typed error; multibyte chars counted as bytes.
-3. WAV: `wav.write` output is valid RIFF and decodes back to the same payload.
-4. Resample: 44.1 kHz input decodes in a 48 kHz pipeline and vice versa.
-5. Noise: payload + white noise at a measured SNR still decodes.
-6. Streaming: waveform pushed in random 128–4096-sample chunks yields exactly one message.
-7. Interop: our WASM decodes audio from npm `ggwave@0.4.0` and vice versa; fixture WAV from upstream GibberLink decodes to known text.
+✅ = implemented and green.
 
-Runic
-8. Elder Futhark table: `"thing"` → `ᚦᛁᛜ`; space handling option; digits/punctuation pass through.
-9. Stability: for every rune set and 1000 random rune strings, `toRunes(toLatin(r)) === r`.
-10. Budget: 46 Elder Futhark runes fit, 47 rejected (3 bytes each, 140 max).
-11. Detection: decoded payload containing U+16A0–U+16FF is flagged runic.
-12. Audio: `decode(encode(toRunes("odin")))` → runes displayed + Latin reading `odin`.
+**Codec**
+1. ✅ Every protocol round-trips exactly.
+2. ✅ 140 bytes accepted, 141 rejected, multibyte characters counted as bytes, empty rejected.
+3. ✅ WAV write → parse → decode.
+4. ✅ 44.1 kHz ⇄ 48 kHz capture.
+5. ✅ White noise at amplitude 0.05.
+6. ✅ Random chunk sizes from 128 to 4096 samples.
+7. ✅ Interop with npm ggwave@0.4.0 in both directions. ⏳ A fixture recorded from the real GibberLink demo is still to add.
+8. ✅ The framing model predicts exact audio length (6 protocols × 4 sizes).
 
-App / CLI
-13. E2E fake mic playing fixture WAV → transcript shows text; runic fixture → runes shown.
-14. CLI: `gibberlink encode -t hi -o hi.wav && gibberlink decode hi.wav` prints `hi`; `gibberlink runes "thing"` prints `ᚦᛁᛜ`.
-15. axe: zero serious/critical violations; runes have accessible Latin labels.
+**Runes**
+9. ✅ Unicode 17 names, full block coverage, strict TOON round-trip, embedded module in sync.
+10. ✅ Layer tree, no duplicates, no leaks, honest `reversible` flags, outlines for every glyph.
+11. ✅ Transliteration examples for all layers, separators, accents, pass-through.
+12. ✅ Stability fixed point, 500 random strings per set.
+13. ✅ 46/47 rune budget. Runes survive the audio channel and read back.
+
+**Flock**
+14. ✅ Reading order holds in every frame, fades stay within [0,1], every bird exits, on screen, deterministic, reduced motion, enters from the right.
+
+**App**
+15. ✅ Compose preview and budget, over-limit disabled, rune keyboard inserts real runes.
+16. ✅ Transmit draws runes on the canvas.
+17. ✅ File decode, and live mic decode of runes.
+18. ✅ axe: zero serious or critical findings.
+19. ⏳ CLI.
 
 ## 9. Open questions
 
-Verify (Claude, M0):
-- Upstream GibberLink default protocol (believed audible fast; read PennyroyalTea/gibberlink source).
-- ggwave decode chunk alignment requirement (`samplesPerFrame`).
-- iOS Safari AudioWorklet mic reliability at 48 kHz.
-- Upstream ggwave release tagging: latest tag list shows only `waver-v*`; confirm the 0.4.3 commit to pin.
+**To verify:**
+- Does upstream GibberLink default to audible fast? Needs a fixture recorded from the real demo.
+- iOS Safari AudioWorklet mic behaviour at 48 kHz.
+- Line breaking around ᛫ in long transcripts.
 
-Decide (Logan, creative):
-- Rune sets for v1.0 (proposed: Elder, Younger, Futhorc) and whether Cirth is wanted.
-- Word separator default: `᛫` vs space.
-- Default wire format for runic messages (proposed: runes on the wire).
-- Visibility of this repo (already public; see STATUS).
+**For Logan:**
+- The visual style of the flock and sky: glyph size, glow, colours, thread on or off. The current look is a first pass; see `docs/images/`.
+
+## 10. Decisions log
+
+**2026-09-13 (Logan):**
+1. The repo stays public.
+2. The v2 stack is approved.
+3. Runes start from the oldest attested set, with later sets layered on top. The lexicon is a TOON file, and rendering must never show missing glyphs.
+4. Rune text uses ᛫ between words; Latin text uses spaces.
+5. Runes fly like a migrating flock while audio plays, ordered enough to read.
+6. Archive gibber-to-runic.
+
+**2026-09-13 (Claude):**
+- Dropped the DT/MT protocols, because upstream ggwave doesn't support them with variable-length payloads.
+- Split `rulesFrom` from `parent` so Younger Futhark never inherits Elder runes.
+- The flock flies right-to-left so the message reads left-to-right as it passes. The first version flew rightward, which read backwards.
+- The sky band is sticky, because pressing Transmit scrolled it out of view.

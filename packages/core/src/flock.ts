@@ -61,11 +61,13 @@ export interface Bird {
 
 interface State {
   g: GlyphTime;
+  /** distance flown (see mirroring note in createFlock) */
   x: number;
   y: number;
   vx: number;
   vy: number;
   jitter: number;
+  lane: number;
 }
 
 function rng(seed: number) {
@@ -87,22 +89,29 @@ const smooth = (t: number) => {
 export function createFlock(glyphs: readonly GlyphTime[], opts: FlockOptions) {
   const { width, height } = opts;
   const rand = rng(opts.seed ?? 1);
-  const speed = opts.speed ?? Math.max(120, width / 5);
+  const speed = opts.speed ?? Math.max(160, width / 3.2);
   const fadeIn = opts.fadeIn ?? 0.35;
   const fadeOut = opts.fadeOut ?? 0.6;
   const margin = 40;
   const midY = height / 2;
-  const amp = opts.reducedMotion ? 0 : height * 0.22;
+  const amp = opts.reducedMotion ? 0 : height * 0.16;
+  const laneSpread = opts.reducedMotion ? 0 : height * 0.28;
   const order = [...glyphs].sort((a, b) => a.index - b.index);
   const birds = new Map<number, State>();
   let lastT: number | null = null;
 
-  /** The migration path: a slow travelling wave, like a skein crossing the sky. */
-  const anchor = (g: GlyphTime, t: number) => {
-    const age = t - g.start;
-    const x = -margin + age * speed;
-    const wave = Math.sin(x * 0.006 + t * 0.7) * amp + Math.sin(x * 0.017 - t * 1.3) * amp * 0.25;
-    return { x, y: midY + wave };
+  // The simulation runs in "distance flown" space (u grows, the leader has the largest u).
+  // Output mirrors it (x = width - u) so the flock flies right-to-left and the message
+  // reads left-to-right as it passes: the first glyph leads on the left.
+
+  /** The migration path: a slow travelling wave with a personal lane per bird, so the stream
+   *  thickens into a band like a murmuration instead of a single line. */
+  const anchor = (b: { g: GlyphTime; lane: number; jitter: number }, t: number) => {
+    const age = t - b.g.start;
+    const u = -margin + age * speed;
+    const wave = Math.sin(u * 0.006 + t * 0.7) * amp + Math.sin(u * 0.017 - t * 1.3) * amp * 0.25;
+    const drift = Math.sin(t * 0.9 + b.jitter) * laneSpread * 0.2;
+    return { x: u, y: midY + wave + b.lane + drift };
   };
 
   // leave when the anchor is past the right edge plus fade distance
@@ -115,15 +124,9 @@ export function createFlock(glyphs: readonly GlyphTime[], opts: FlockOptions) {
     for (const g of order) {
       const age = t - g.start;
       if (age >= 0 && age < exitAge + fadeOut && !birds.has(g.index)) {
-        const a = anchor(g, t);
-        birds.set(g.index, {
-          g,
-          x: a.x,
-          y: a.y + (opts.reducedMotion ? 0 : (rand() - 0.5) * 30),
-          vx: speed,
-          vy: 0,
-          jitter: rand() * Math.PI * 2,
-        });
+        const seed = { g, lane: (rand() - 0.5) * laneSpread, jitter: rand() * Math.PI * 2 };
+        const a = anchor(seed, t);
+        birds.set(g.index, { ...seed, x: a.x, y: a.y, vx: speed, vy: 0 });
       }
       if (age >= exitAge + fadeOut) birds.delete(g.index);
     }
@@ -153,7 +156,7 @@ export function createFlock(glyphs: readonly GlyphTime[], opts: FlockOptions) {
           cohY += o.y;
           n++;
         }
-        const a = anchor(b.g, t);
+        const a = anchor(b, t);
         let ax = (a.x - b.x) * 9 - (b.vx - speed) * 3.5; // spring to anchor: keeps order
         let ay = (a.y - b.y) * 4 - b.vy * 2.2;
         if (n > 0) {
@@ -178,7 +181,7 @@ export function createFlock(glyphs: readonly GlyphTime[], opts: FlockOptions) {
       }
     } else {
       for (const b of live) {
-        b.x = anchor(b.g, t).x;
+        b.x = anchor(b, t).x;
         b.y = midY;
       }
     }
@@ -190,9 +193,9 @@ export function createFlock(glyphs: readonly GlyphTime[], opts: FlockOptions) {
       return {
         index: b.g.index,
         glyph: b.g.glyph,
-        x: b.x,
+        x: width - b.x,
         y: b.y,
-        angle: opts.reducedMotion ? 0 : clamp(Math.atan2(b.vy, Math.max(1, b.vx)), -0.5, 0.5),
+        angle: opts.reducedMotion ? 0 : clamp(-Math.atan2(b.vy, Math.max(1, b.vx)), -0.5, 0.5),
         alpha: clamp(alpha, 0, 1),
         scale: 0.6 + 0.4 * smooth(age / fadeIn),
       };

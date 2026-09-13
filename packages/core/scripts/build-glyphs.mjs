@@ -85,7 +85,7 @@ execFileSync("pyftsubset", [
   `--unicodes=U+0020,U+16A0-16F8`,
   "--flavor=woff2",
   "--layout-features=*",
-  `--output-file=${join(web, "public", "fonts", "NotoSansRunic-subset.woff2")}`,
+  `--output-file=${join(web, "src", "assets", "NotoSansRunic-subset.woff2")}`,
 ]);
 copyFileSync(join(work, "OFL.txt"), join(web, "public", "fonts", "OFL-NotoSansRunic.txt"));
 

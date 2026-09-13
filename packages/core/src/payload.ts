@@ -3,8 +3,10 @@ export const MAX_PAYLOAD_BYTES = 140;
 
 export class PayloadTooLargeError extends Error {
   readonly name = "PayloadTooLargeError";
-  constructor(readonly bytes: number) {
+  readonly bytes: number;
+  constructor(bytes: number) {
     super(`Message is ${bytes} bytes; GibberLink carries at most ${MAX_PAYLOAD_BYTES}.`);
+    this.bytes = bytes;
   }
 }
 

@@ -1,48 +1,51 @@
 # GibberLink UI — Roadmap
 
-What's next, in order. `STATUS.md` = what's true now. `docs/SPEC.md` = what/why + library picks.
-`CLAUDE.md` = how we work. Each milestone ends green on `npm test` before the next starts.
+What's next, in order. `STATUS.md` = what's true now. `docs/SPEC.md` = what/why + decisions.
+`CLAUDE.md` = how we work. Each milestone ends green on `npm test` and `npm run e2e`.
 
 ## Done
 
-- v0 prototype (Sep 2025): Tkinter UI + Rust `gibberlink-tx` encoder, WAV decode via PyPI ggwave, Windows release workflow (never tagged)
-- v2 plan (2026-09-13): SPEC with runic design + re-selected 2026 libraries, ROADMAP, STATUS, CLAUDE, MIT LICENSE
-- `gibber-to-runic` absorbed into this plan (that repo was empty; its scope is SPEC §5)
+- v0 prototype (Sep 2025): Tkinter + Rust encoder, now in `legacy/`
+- v2 plan: SPEC, ROADMAP, STATUS, CLAUDE, MIT LICENSE (2026-09-13)
+- **M0 Foundation** (2026-09-13)
+  - v0 moved to `legacy/`; empty submodules removed
+  - npm workspaces; TS 7, Biome 2, Vitest 5
+  - `ggwave-wasm` builds from hash-checked sources and is byte-reproducible
+  - CI workflows written: lint, types, unit, E2E, WASM rebuild diff
+- **M1 Core** (2026-09-13)
+  - Codec, WAV, byte timeline; interop with npm ggwave in both directions
+  - Runic tomes lexicon: 8 layered sets, 105 runes, 140 rules, all checked against Unicode 17
+  - Glyph outlines for all 89 runic code points, plus a 3.2 KB font subset
+  - Flock simulation
+- **M2 Web app, first pass** (2026-09-13)
+  - Compose (rune keyboard, set and separator pickers, byte budget, WAV download)
+  - Flock flight synced to audio; Listen by mic and by file; transcript with export
+  - PWA build; E2E suite with fake mic and axe
 
 ## Next
 
-### M0 — Foundation (target 2026-09-20)
-1. Logan decisions: visibility, rune sets, separator, runic wire default (SPEC §9)
-2. Move v0 to `legacy/`; remove the empty `ggwave` and `gibberlink-translator` submodules
-3. npm workspaces: `packages/ggwave-wasm`, `core`, `web`, `cli`; TS 7 strict, Biome 2, Vitest 5
-4. `ggwave-wasm`: reproducible emsdk build of pinned upstream ggwave, checksum test, CI job
-5. Resolve SPEC §9 verify items; record interop fixture WAVs (upstream GibberLink + npm ggwave oracle) into `fixtures/`
-6. CI: Biome + typecheck + test on PRs and `main`; Renovate
-7. Close out `d4rkd0s/gibber-to-runic`: set description to point here, archive it (Logan confirms)
+### M2 finish (target 2026-09-27)
+1. Merge the v2 branch to `main` (draft PR). The Pages workflow deploys on merge.
+2. Enable GitHub Pages (source: GitHub Actions) and check the live site on desktop and phone
+3. Logan reviews the flock look (SPEC §9); tune glyph size, glow, colours and thread
+4. Spectrogram / level meter for mic input
+5. Record an interop fixture from the real GibberLink demo into `fixtures/` (SPEC test 7)
+6. iOS Safari mic check; wrapping check for ᛫ in long transcripts
+7. Archive `d4rkd0s/gibber-to-runic` (approved; see STATUS)
 
-### M1 — Core (target 2026-09-27)
-1. Acceptance tests 1–12 written failing first
-2. Codec: `encode`, `createDecoder` (chunk-buffered), `wav`, `resample`, typed payload errors
-3. Runes: Elder Futhark, Younger Futhark, Futhorc tables; transliterate both ways; runic detection; budget helper
-
-### M2 — Web app (target 2026-10-11)
-1. Svelte 5 + Vite 8 shell; light/dark
-2. Compose panel: text ⇄ runes side by side, rune set picker, byte + rune budget, wire toggle, Play, Download WAV
-3. Listen panel: file drop + live mic (AudioWorklet → worker), level meter, transcript with text/rune views
-4. Spectrogram canvas; export `.txt`/`.json`
-5. Playwright fake-mic E2E (13) + axe (15)
-
-### M3 — Ship (target 2026-10-25)
-1. PWA (vite-plugin-pwa), GitHub Pages deploy
-2. CLI: `encode`, `decode`, `runes` (test 14); publish to npm as `gibberlink-ui` or scoped (check name)
-3. README rewrite through humanizer, screenshots/GIF, CONTRIBUTING, SECURITY, issue templates
-4. Delete `legacy/`, tag `v1.0.0`, confirm public
+### M3 Ship v1.0 (target 2026-10-25)
+1. `packages/cli`: `gibberlink encode | decode | runes`, built with tsdown; publish to npm (check the name)
+2. README rewrite through humanizer with the screenshots in `docs/images/`; CONTRIBUTING, SECURITY, issue templates
+3. Rune lexicon page in the app: browse sets by layer with names, IPA, notes and sources
+4. Delete `legacy/`, tag `v1.0.0`
 
 ## Later / exploratory
 
-- Multi-part messages for text longer than 140 bytes (sequence header inside payload)
-- Tolkien Cirth / custom rune sets via JSON table + bundled font (ask Logan first)
-- Auto-detect protocol on decode, shown per message
-- Conversation mode: two-speaker transcript for replaying AI↔AI GibberLink calls
-- Share link with message in URL fragment (never sent to a server)
-- Tauri desktop wrapper if requested; i18n of UI strings
+- Multi-part messages over 140 bytes (sequence header inside the payload)
+- Staveless / Hälsinge runes as an SVG-only style (no code points exist)
+- Cirth as an SVG-only, clearly-fictional set (ask Logan first)
+- Export a flight as GIF/WebM, or runes as SVG/PNG
+- Auto-detect protocol on decode
+- Conversation mode for replaying AI↔AI GibberLink calls
+- Share link with the message in the URL fragment
+- Tauri desktop wrapper if requested; UI translations

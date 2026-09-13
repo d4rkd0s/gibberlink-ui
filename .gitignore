@@ -1,10 +1,13 @@
 node_modules/
 .vendor/
 packages/web/dist/
+packages/web/dev-dist/
 packages/cli/dist/
 coverage/
 test-results/
 playwright-report/
+packages/web/e2e/.fixtures/
+packages/web/e2e/.screens/
 *.log
 .DS_Store
 Thumbs.db
