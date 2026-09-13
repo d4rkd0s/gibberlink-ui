@@ -1,99 +1,61 @@
+# GibberLink UI
 
-<img width="1200" height="320" alt="gibberlink-logo-dark" src="https://github.com/user-attachments/assets/f80237f9-5786-40c3-bce4-e38b46dbdba9" />
+GibberLink UI turns text or runes into GibberLink sound and turns that sound back into text. It runs in your browser. Nothing is uploaded, and the microphone audio stays on your device.
 
-## Capabilities
-Encode and decode Gibberlink/ggwave audio with ease ✨, comes with:
-- Encode: text -> WAV (via CLI and UI)
-- Decode: WAV -> text (CLI `--decode` and UI "Decode" section)
+![Runes flying across the sky band while a message plays](docs/images/flock-desktop.png)
 
-- A small Python UI (Tkinter) with a volume slider
-- A Python wrapper (`gibberlink-ui.py`) that builds/runs the Rust CLI
-- A Rust CLI (`gibberlink-tx`) that uses the official `ggwave` C library to encode audio
+GibberLink is the data-over-sound protocol from the viral demo where two AI agents stopped talking and started beeping at each other. Under the hood it is [ggwave](https://github.com/ggerganov/ggwave), so anything this app sends can be read by other ggwave apps, and it can read theirs.
 
-<img width="682" height="551" alt="image" src="https://github.com/user-attachments/assets/dfec562f-d52f-486d-a67f-2305ab01e96d" />
+## What it does
 
-## Download
+Type a message and press Transmit. The app plays the sound, and each rune flies across the sky at the moment its bytes are on air. The runes stay in reading order, so the first one always leads.
 
-TBD
+You can also write in runes directly with the on-screen rune keyboard, or send plain text as typed.
 
-## Quick Start
+To decode, open a recording or turn on the microphone and hold it near a speaker. Decoded runes appear with their Latin reading, and you can copy or export the transcript.
 
-- UI (recommended):
+A single message holds 140 bytes. A rune takes 3 bytes in UTF-8, so that is 46 runes.
 
-  ```
-  python launcher.py
-  ```
-  On Windows, you can also double‑click `launcher.py`.
+## Runes
 
-- CLI:
+Elder Futhark, the oldest attested runic alphabet (Vimose comb, around 160 CE), is the base. Anglo-Saxon Futhorc, Younger Futhark (long-branch and short-twig), medieval dotted runes, the Franks Casket cryptic runes, the golden-number runes and Tolkien's three Unicode runes build on it.
 
-  ```
-  python gibberlink-ui.py --text "hello world" --protocol audible:fast --volume 75 --out gibberlink.wav
-  ```
+All of this lives in one data file, [`runic-lexicon.toon`](packages/core/data/runic-lexicon.toon). Each rune records its Unicode code point and name, its reconstructed name, transliteration, IPA and a source. The test suite checks every entry against Unicode 17.0 and confirms that all 89 characters of the Runic block are covered. Sources and open questions are in [`docs/research/runes.md`](docs/research/runes.md).
 
-- Decode from WAV -> text:
+Scholars transliterate runes into Latin letters. There is no standard for the other direction, so turning English into runes follows a modern convention, and letters with no historical rune are marked as such in the data.
 
-  ```
-  python gibberlink-ui.py --decode gibberlink.wav
-  ```
+Words in rune text are separated by ᛫. You can pick ᛬, ᛭, a space, or no separator, which is how most Elder Futhark inscriptions were carved.
 
-- Direct Rust binary (after build):
+The app draws runes from embedded outlines taken from Noto Sans Runic, so they display correctly even on devices with no runic font, such as macOS and iOS.
 
-  ```
-  gibberlink-tx/target/release/gibberlink-tx --text "hello" --protocol audible:fast --volume 75 --out hello.wav --play
-  ```
+## Development
 
-The first run will build the Rust binary automatically (one‑time).
+Requires Node 22 or newer (Node 24 for the end-to-end fixture script).
 
+```bash
+npm ci
+npm run dev -w @gibberlink/web   # http://localhost:5173
+npm test                         # unit tests
+npm run e2e                      # Playwright, with a fake microphone
+```
 
-## Requirements
+The ggwave WebAssembly build is committed. To rebuild it you need [emsdk](https://emscripten.org/docs/getting_started/downloads.html):
 
-- Python 3.10+ with Tkinter (Windows Python includes Tkinter by default)
-- Rust toolchain with Cargo (for building the encoder): https://rustup.rs/
-- Windows: audio playback uses the built‑in WinMM (`PlaySoundW`)
-- macOS/Linux: fallback playback tries `ffplay`, `afplay`, `aplay`, or `paplay` if available
+```bash
+bash packages/ggwave-wasm/build.sh
+```
 
-This repo already includes the `ggwave` source tree under `ggwave/`. The Rust build compiles it statically.
+The repo is laid out like this:
 
+```
+packages/ggwave-wasm   pinned, reproducible ggwave build
+packages/core          codec, WAV, runes, flock animation (no DOM)
+packages/web           Svelte app
+legacy/                the 2025 Python and Rust prototype
+```
 
-## Usage Details
+Project notes for contributors are in [`STATUS.md`](STATUS.md), [`ROADMAP.md`](ROADMAP.md) and [`docs/SPEC.md`](docs/SPEC.md).
 
-- UI controls:
-  - Text input: the message to encode
-  - Protocol: `audible|ultrasound|dt|mt` + `:normal|fast|fastest` (e.g., `audible:fast`)
-  - Volume: 0–100 (default 75). Very high levels can distort.
-  - Output file: path to save the generated WAV. Playback is optional.
-  - Decode section: browse a `.wav` or use last generated file and decode to text.
+## License
 
-- CLI flags (wrapper):
-  - `--text/-t`: text to encode (reads stdin if omitted)
-  - `--protocol`: defaults to `audible:fast`
-  - `--volume`: 0–100 (default 75)
-  - `--out`: output WAV path (default `gibberlink.wav`)
-  - `--no-play`: generate but do not play
-  - `--ui`: launch the Tkinter UI
-  - `--decode WAV`: decode payload from a WAV file and print
-
-
-## Project Layout
-
-- `gibberlink-ui.py` — Python wrapper + Tkinter UI
-- `launcher.py` — one‑liner launcher to open the UI
-- `gibberlink-tx/` — Rust CLI that links against `ggwave`
-  - `build.rs` — compiles `../ggwave/src/ggwave.cpp`
-  - `src/main.rs` — FFI to `ggwave`, WAV writer, and platform playback
-- `ggwave/` — upstream `ggwave` sources (MIT License)
-
-
-## Troubleshooting
-
-- Cargo not found: install Rust via rustup, then re‑run.
-- Playback is too quiet: increase `--volume`, raise OS output, or use external amplification.
-- Ultrasound modes: likely inaudible to humans; reception depends on hardware.
-- Linux/macOS playback: ensure one of `ffplay`, `afplay`, `aplay`, or `paplay` exists, or open the saved WAV in any player.
-
-
-## Attribution
-
-- `ggwave` by Georgi Gerganov (MIT): https://github.com/ggerganov/ggwave
-- Concept inspired by Gibberlink translator repo: https://github.com/yanivlevydfs/gibberlink-translator
+MIT. The ggwave sources are MIT. The Noto Sans Runic font subset and the rune outlines derived from it are under the SIL Open Font License 1.1 (see `packages/core/data/OFL-NotoSansRunic.txt`).

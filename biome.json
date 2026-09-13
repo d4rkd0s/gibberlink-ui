@@ -1,0 +1,45 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.13/schema.json",
+  "files": {
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/.vendor",
+      "!legacy",
+      "!**/node_modules",
+      "!**/*.toon",
+      "!**/data.generated.ts",
+      "!**/test-results",
+      "!**/playwright-report",
+      "!**/e2e/.fixtures",
+      "!**/e2e/.screens"
+    ]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120
+  },
+  "linter": {
+    "rules": {
+      "preset": "recommended",
+      "suspicious": { "noExplicitAny": "off" }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/test/**", "**/e2e/**"],
+      "linter": { "rules": { "style": { "noNonNullAssertion": "off" } } }
+    },
+    {
+      "includes": ["**/*.svelte"],
+      "formatter": { "enabled": false },
+      "linter": {
+        "rules": {
+          "correctness": { "noUnusedImports": "off", "noUnusedVariables": "off" },
+          "style": { "useConst": "off" }
+        }
+      }
+    }
+  ]
+}
