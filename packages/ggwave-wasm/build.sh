@@ -26,7 +26,9 @@ fi
 (cd "$vendor" && sha256sum --quiet -c "$here/SOURCES.sha256")
 
 mkdir -p "$out"
-em++ -O3 -std=c++17 -flto \
+# NDEBUG matches upstream's CMake Release build and drops assert() __FILE__ strings;
+# the prefix map keeps any remaining paths machine-independent (reproducible, no local paths).
+em++ -O3 -std=c++17 -flto -DNDEBUG -ffile-prefix-map="$vendor"=ggwave \
   -I "$vendor/include" -I "$vendor/src" \
   "$vendor/src/ggwave.cpp" "$vendor/bindings/javascript/emscripten.cpp" \
   -lembind \
