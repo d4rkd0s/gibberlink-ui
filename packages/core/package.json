@@ -1,0 +1,16 @@
+{
+  "name": "@gibberlink/core",
+  "version": "0.1.0",
+  "description": "Text, runes and GibberLink (ggwave) audio conversion. No DOM; runs in browsers and Node.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@gibberlink/ggwave-wasm": "0.1.0"
+  },
+  "devDependencies": {
+    "ggwave": "^0.4.0"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "gibberlink-ui-monorepo",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "packages/ggwave-wasm",
+    "packages/core",
+    "packages/cli",
+    "packages/web"
+  ],
+  "scripts": {
+    "build:wasm": "npm run build -w @gibberlink/ggwave-wasm",
+    "test": "vitest run",
+    "typecheck": "tsc -b",
+    "lint": "biome check ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.13",
+    "@toon-format/toon": "^4.1.1",
+    "@types/node": "^22.20.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
+  }
+}
