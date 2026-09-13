@@ -4,7 +4,7 @@ _Last verified: 2026-09-13. Update whenever reality changes._
 
 ## State
 
-**v2 is working locally on branch `worktree-v2-plan`. It is not merged and not deployed.** `main` still holds the v0 prototype.
+**v2 is on branch `worktree-v2-plan`, open as draft [PR #1](https://github.com/d4rkd0s/gibberlink-ui/pull/1). It is not merged and not deployed.** `main` still holds the v0 prototype.
 Gates, last run 2026-09-13:
 
 | Gate | Result |
@@ -20,7 +20,8 @@ Gates, last run 2026-09-13:
 
 | Piece | Notes |
 |---|---|
-| ggwave WASM | Pinned upstream `060aec7`, emsdk 6.0.9, 82 KB. Decodes npm ggwave@0.4.0 audio and vice versa. |
+| ggwave WASM | Pinned upstream `060aec7`, emsdk 6.0.9, 82 KB, built with `-DNDEBUG -ffile-prefix-map`. Builds from different directories hash-identically, and the binary contains no local paths. Decodes npm ggwave@0.4.0 audio and vice versa. |
+| GitHub CI on PR #1 | `test` and `e2e` green on GitHub. `wasm` rebuild diff green after the path-leak fix in `191ebb6`. All 3 jobs green. |
 | Codec | Audible and ultrasound × normal/fast/fastest round-trip. Survives 44.1⇄48 kHz, noise and random chunking. |
 | Byte timeline | Predicts exact sample length for every protocol. Drives flock timing. |
 | Runic lexicon | 8 sets, 105 rune rows, 140 rules. Unicode 17 names verified. All 89 Runic-block characters covered. |
@@ -36,7 +37,6 @@ Gates, last run 2026-09-13:
 | Priority | Gap |
 |---|---|
 | P1 | Not merged to `main`, so the Pages workflow hasn't run; Pages isn't enabled in repo settings yet |
-| P1 | CI workflows are committed but have never run on GitHub (they run on the PR) |
 | P2 | No fixture recorded from the real GibberLink demo (SPEC test 7). Interop is proven only against npm ggwave@0.4.0. |
 | P2 | Not tested on iOS Safari or Firefox; no mic spectrogram yet |
 | P2 | Flock look is a first pass and needs Logan's eye (SPEC §9) |
@@ -49,7 +49,7 @@ Gates, last run 2026-09-13:
 |---|---|
 | GitHub | `d4rkd0s/gibberlink-ui`, PUBLIC (Logan: keep public), 5 stars |
 | Pushing | The `gh` HTTPS token lacks `workflow` scope, so pushes that touch `.github/workflows` must go over SSH (`git push git@github.com:d4rkd0s/gibberlink-ui.git <branch>`). `gh auth refresh -s workflow` would fix HTTPS. |
-| Sibling repo | `d4rkd0s/gibber-to-runic`: PRIVATE, empty. Scope absorbed here (SPEC §5). Logan approved archiving. |
+| Sibling repo | `d4rkd0s/gibber-to-runic`: **archived 2026-09-13**, and its description points here. It was empty; its scope is SPEC §5. |
 | Local toolchain | Node 26, emsdk at `~/emsdk` (6.0.9), fontTools 4.62, Playwright Chromium installed |
 
 ## Decisions pending (Logan)

@@ -21,6 +21,7 @@ What's next, in order. `STATUS.md` = what's true now. `docs/SPEC.md` = what/why 
   - Compose (rune keyboard, set and separator pickers, byte budget, WAV download)
   - Flock flight synced to audio; Listen by mic and by file; transcript with export
   - PWA build; E2E suite with fake mic and axe
+- `d4rkd0s/gibber-to-runic` archived (2026-09-13); draft PR #1 opened
 
 ## Next
 
@@ -31,7 +32,6 @@ What's next, in order. `STATUS.md` = what's true now. `docs/SPEC.md` = what/why 
 4. Spectrogram / level meter for mic input
 5. Record an interop fixture from the real GibberLink demo into `fixtures/` (SPEC test 7)
 6. iOS Safari mic check; wrapping check for ᛫ in long transcripts
-7. Archive `d4rkd0s/gibber-to-runic` (approved; see STATUS)
 
 ### M3 Ship v1.0 (target 2026-10-25)
 1. `packages/cli`: `gibberlink encode | decode | runes`, built with tsdown; publish to npm (check the name)
