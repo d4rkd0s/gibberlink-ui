@@ -27,20 +27,20 @@ def ensure_binary() -> str:
     bundle_dir = getattr(sys, "_MEIPASS", None)
     if bundle_dir:
         bundled = os.path.join(bundle_dir, exe_name)
-        if os.path.exists(bundled):
+        if os.path.isfile(bundled):
             return bundled
 
     # 2) Look next to the executable when frozen (onedir) or next to this file when not
     here = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.abspath(__file__))
     local_cli = os.path.join(here, exe_name)
-    if os.path.exists(local_cli):
+    if os.path.isfile(local_cli):  # isfile: on macOS/Linux "gibberlink-tx" is also the source dir
         return local_cli
 
     # 3) Development tree path
     dev_cli = os.path.join(here, "gibberlink-tx", "target", "release", "gibberlink-tx")
     if os.name == "nt":
         dev_cli += ".exe"
-    if os.path.exists(dev_cli):
+    if os.path.isfile(dev_cli):
         return dev_cli
 
     # 4) Try building it from source
@@ -53,7 +53,7 @@ def ensure_binary() -> str:
     except subprocess.CalledProcessError as e:
         print(f"Cargo build failed with code {e.returncode}", file=sys.stderr)
         sys.exit(e.returncode)
-    if not os.path.exists(dev_cli):
+    if not os.path.isfile(dev_cli):
         print("Build succeeded but binary not found. Please check the build output.", file=sys.stderr)
         sys.exit(3)
     return dev_cli

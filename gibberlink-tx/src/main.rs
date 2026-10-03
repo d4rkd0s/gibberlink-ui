@@ -97,7 +97,7 @@ struct Args {
     sample_rate: Option<u32>,
 
     /// Play after generating
-    #[arg(long, default_value_t = true)]
+    #[arg(long)]
     play: bool,
 
     /// Decode payload from WAV file and print as text
@@ -337,11 +337,11 @@ fn play_wav_blocking(path: &std::path::Path) -> Result<(), String> {
 
 #[cfg(not(target_os = "windows"))]
 fn play_wav_blocking(path: &std::path::Path) -> Result<(), String> {
-    // Fallback: try to spawn `ffplay` or `aplay` if available
+    // Fallback: spawn the first available player (afplay ships with macOS)
     let candidates = [
-        ("ffplay", &["-nodisp", "-autoexit"] as &[&str]),
-        ("aplay", &[] as &[&str]),
         ("afplay", &[] as &[&str]),
+        ("ffplay", &["-nodisp", "-autoexit", "-loglevel", "quiet"] as &[&str]),
+        ("aplay", &[] as &[&str]),
         ("paplay", &[] as &[&str]),
     ];
     for (cmd, args) in candidates {
